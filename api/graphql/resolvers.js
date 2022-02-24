@@ -1,16 +1,19 @@
-import { githubFetcher } from '../../services/github-fetcher'
+import { githubFetcher } from '../../services/github-fetcher';
+import { throttler } from '../../utils/throttler';
 
 export const rootValue = {
   repository: async ( { username, name, token }) => {
+    // throttling
+    await throttler.handle(token, 1, 2);
+
     try {
-      // throttling
       const [data, webhooks, fileContent] = await Promise.all([
         githubFetcher.fetchRepository(username, name, token),
         githubFetcher.getWebhooks(username, name, token),
         githubFetcher.getFileContent(username, name, token)
       ]);
 
-      const r = {
+      return {
         name: data.name,
         size: data.size,
         isPrivate: data.private,
@@ -28,9 +31,7 @@ export const rootValue = {
           name: item.name,
         })),
       };
-      console.log('r', r);
 
-      return r;
     } catch (err) {
       console.error(err);
       throw new Error('Error fetching repository details');
