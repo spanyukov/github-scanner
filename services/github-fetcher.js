@@ -1,5 +1,5 @@
-import {Octokit} from '@octokit/core';
-import {Octokit as OctokitRest} from '@octokit/rest';
+import { Octokit } from '@octokit/core';
+import { Octokit as OctokitRest } from '@octokit/rest';
 
 
 export const githubFetcher = {
@@ -9,10 +9,10 @@ export const githubFetcher = {
             const {data} = await octokit.request('GET /users/{username}/repos', {
                 username,
             });
-            console.log(data);
+
             return data;
         } catch (e) {
-            console.log(e);
+            console.error(e);
             throw new Error('Internal error');
         }
     },
@@ -27,7 +27,7 @@ export const githubFetcher = {
 
             return data;
         } catch (e) {
-            console.log(e);
+            console.error(e);
             throw new Error('Internal error');
         }
     },
@@ -51,7 +51,7 @@ export const githubFetcher = {
 
             return content;
         } catch (e) {
-            console.log(e);
+            console.error(e);
             throw new Error('Internal error');
         }
     },
@@ -66,10 +66,26 @@ export const githubFetcher = {
 
             return data.filter(item => item.active);
         } catch (e) {
-            console.log(e);
+            console.error(e);
+            throw new Error('Internal error');
+        }
+    },
+
+    async getFilesCount(username, name, treeSha, token) {
+        const octokit = new Octokit({ auth: token });
+        try {
+            const { data } = await octokit.request('GET /repos/{owner}/{repo}/git/trees/{tree_sha}', {
+                owner: username,
+                repo: name,
+                tree_sha: treeSha,
+                recursive: true,
+            });
+            const files = data?.tree.filter(item => item.type === 'blob');
+
+            return Number(files.length);
+        } catch (e) {
+            console.error(e);
             throw new Error('Internal error');
         }
     }
-
-
-}
+};

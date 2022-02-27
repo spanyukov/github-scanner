@@ -7,17 +7,18 @@ export const rootValue = {
     await throttler.handle(token, 1, 2);
 
     try {
-      const [data, webhooks, fileContent] = await Promise.all([
+      const [data, webhooks, fileContent, filesAmount] = await Promise.all([
         githubFetcher.fetchRepository(username, name, token),
         githubFetcher.getWebhooks(username, name, token),
-        githubFetcher.getFileContent(username, name, token)
+        githubFetcher.getFileContent(username, name, token),
+        githubFetcher.getFilesCount(username, name, 'master', token)
       ]);
 
       return {
         name: data.name,
         size: data.size,
         isPrivate: data.private,
-        //filesAmount,
+        filesAmount,
         yamlFileContent: fileContent,
         owner: {
           login: data.owner.login,
